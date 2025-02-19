@@ -1,32 +1,17 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, Settings2, Share, Download, MoreHorizontal, ChevronDown, Info, Maximize2 } from 'lucide-react';
-import { addMonths, addWeeks, addQuarters } from 'date-fns';
 import TimelineContainer from '@/components/TimelineContainer';
 import StatusCategoryDropdown from '@/components/StatusCategoryDropdown';
-
-// Types
-// interface Epic {
-//   id: string;
-//   title: string;
-//   startDate: Date;
-//   endDate: Date;
-//   status: 'todo' | 'in_progress' | 'done';
-// }
 
 interface TimelineProps {
   projectId: string;
 }
 
 const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
-  // States
   const [viewMode, setViewMode] = useState<'Today' | 'Weeks' | 'Months' | 'Quarters'>('Months');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    start: new Date(),
-    end: addMonths(new Date(), 3)
-  });
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -36,32 +21,6 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
     progress: true,
     warnings: true
   });
-
-  // Effect to update date range based on view mode
-  useEffect(() => {
-    const today = new Date();
-    let end;
-    
-    switch (viewMode) {
-      case 'Today':
-        end = addWeeks(today, 1);
-        break;
-      case 'Weeks':
-        end = addWeeks(today, 4);
-        break;
-      case 'Months':
-        end = addMonths(today, 3);
-        break;
-      case 'Quarters':
-        end = addQuarters(today, 1);
-        break;
-      default:
-        end = addMonths(today, 3);
-    }
-    
-    setDateRange({ start: today, end });
-  }, [viewMode]);
-
 
   // Settings panel component
   const SettingsPanel = () => (
@@ -182,6 +141,7 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
 
       {/* Timeline */}
       <TimelineContainer timeOption={viewMode} />
+      
       <div className="border rounded-lg absolute bottom-10 right-20">
         {/* Timeline Controls */}
         <div className="flex items-center justify-between p-4 border-t">

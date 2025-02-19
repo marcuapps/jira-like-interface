@@ -15,19 +15,15 @@ const JiraInterface = () => {
           <div className="text-sm text-gray-600 mb-2">Projects / My Scrum Project</div>
           <h1 className="text-2xl font-medium">Summary</h1>
         </div>
-
-        {/* Status Cards */}
+        
         <Status />
-
-        {/* Status Overview */}
         <StatusOverview />
 
-        {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <PriorityBreakdown />
           <TypesOfWork />
         </div>
-
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <TeamWorkload />
           <EpicProgress />

@@ -13,6 +13,7 @@ import {
   Plus,
   Archive
 } from 'lucide-react';
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,13 +58,17 @@ export default function RootLayout({
               <div className="mb-6">
                 <h3 className="text-xs font-medium text-gray-500 mb-2">PLANNING</h3>
                 <ul className="space-y-2">
-                  <li className="flex items-center space-x-2 text-blue-600 bg-blue-50 p-2 rounded">
-                    <Layout className="w-4 h-4" />
-                    <span>Summary</span>
+                  <li>
+                    <Link className="flex items-center space-x-2 text-blue-600 bg-blue-50 p-2 rounded" href={"/summary"}>
+                      <Layout className="w-4 h-4" />
+                      <span>Summary</span>
+                    </Link>
                   </li>
-                  <li className="flex items-center space-x-2 text-gray-700 p-2">
-                    <Clock className="w-4 h-4" />
-                    <span>Timeline</span>
+                  <li >
+                    <Link className="flex items-center space-x-2 text-gray-700 p-2 hover:bg-gray-100" href={"/timeline"}>
+                      <Clock className="w-4 h-4" />
+                      <span>Timeline</span>
+                    </Link>
                   </li>
                   <li className="flex items-center space-x-2 text-gray-700 p-2">
                     <List className="w-4 h-4" />

@@ -294,27 +294,8 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({ timeOption }) => 
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              placeholder="Search timeline"
-              className="px-4 py-2 border rounded-md"
-            />
-            <button className="px-4 py-2 border rounded-md">
-              Status category
-            </button>
-          </div>
-          <button className="px-4 py-2 border rounded-md">
-            View settings
-          </button>
-        </div>
-      </div>
-
       {/* Timeline */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden border">
         <ScrollableTimeline timeOption={timeOption} />
       </div>
     </div>

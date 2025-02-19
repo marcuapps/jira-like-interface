@@ -1,8 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Search, Settings, Share, Download, MoreHorizontal, Plus, ChevronDown, Info, Maximize2 } from 'lucide-react';
+import { Search, Settings2, Share, Download, MoreHorizontal, Plus, ChevronDown, Info, Maximize2 } from 'lucide-react';
 import { format, addMonths, addWeeks, addQuarters, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import TimelineContainer from '@/components/TimelineContainer';
+import StatusCategoryDropdown from '@/components/StatusCategoryDropdown';
 
 // Types
 interface Epic {
@@ -94,10 +95,20 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
 
   // Settings panel component
   const SettingsPanel = () => (
-    <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg p-4 w-80 z-20">
+    <div className="absolute right-0 top-12 bg-white border rounded-lg shadow-lg p-4 w-[450px] z-20">
       <div className="space-y-4">
         <div>
-          <h3 className="font-medium mb-2">Display range</h3>
+          <h3 className="font-semibold text-sm text-gray-500 mb-3">Display range</h3>
+          <label className="flex items-center justify-between">
+            <span>Show completed</span>
+            <div className={`relative inline-block w-10 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer ${settings.showCompleted ? 'bg-green-500' : 'bg-gray-200'}`}
+                 onClick={() => setSettings({...settings, showCompleted: !settings.showCompleted})}>
+              <div className={`inline-block w-4 h-4 transition duration-200 ease-in-out transform bg-white rounded-full ${settings.showCompleted ? 'translate-x-5' : 'translate-x-0'}`} />
+            </div>
+          </label>
+        </div>
+
+        <div>
           <select 
             className="w-full border rounded p-1"
             value={settings.displayRange}
@@ -107,20 +118,18 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
             <option value="6 months">6 months</option>
             <option value="3 months">3 months</option>
           </select>
+          <span className='text-xs text-gray-500'>Completed Epic issues with due dates outside of this range won't show on your timeline.</span>
         </div>
+    
+        <hr />
 
-        <div>
-          <label className="flex items-center justify-between">
-            <span>Show completed</span>
-            <div className="relative inline-block w-10 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer bg-gray-200"
-                 onClick={() => setSettings({...settings, showCompleted: !settings.showCompleted})}>
-              <div className={`inline-block w-4 h-4 transition duration-200 ease-in-out transform bg-white rounded-full ${settings.showCompleted ? 'translate-x-5' : 'translate-x-0'}`} />
-            </div>
-          </label>
-        </div>
+        <p className='mt-2'>Expand all Epic issues</p>
+        <p>Collapse all Epic issues</p>
+
+        <hr />
 
         <div className="space-y-2">
-          <h3 className="font-medium">Visual details</h3>
+          <h3 className="font-semibold text-sm text-gray-500">Visual details</h3>
           <label className="flex items-center justify-between">
             <span>Dependencies</span>
             <div className="relative inline-block w-10 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer bg-gray-200">
@@ -186,14 +195,15 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <StatusFilter />
+          {/* <StatusFilter /> */}
+          <StatusCategoryDropdown />
         </div>
         <div className="relative">
           <button
-            className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded"
+            className="flex items-center space-x-2 px-2 py-1 text-blue-600 hover:bg-blue-100 rounded"
             onClick={() => setShowSettings(!showSettings)}
           >
-            <Settings className="w-5 h-5" />
+            <Settings2 className="w-5 h-5" />
             <span>View settings</span>
           </button>
           {showSettings && <SettingsPanel />}

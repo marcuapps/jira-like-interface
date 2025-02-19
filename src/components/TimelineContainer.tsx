@@ -264,7 +264,7 @@ const DayTilesRow: React.FC<DayTilesRowProps> = ({ startDate, endDate }) => {
             {periods.map((period, index) => (
               <div 
                 key={index}
-                className="w-64 h-96 border-r border-gray-200 flex-shrink-0 bg-gray-50"
+                className="w-64 h-96 border-r border-gray-200 flex-shrink-0 bg-white"
               >
                 <div className="relative h-full">
                   {index === 1 && (

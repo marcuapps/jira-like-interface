@@ -3,6 +3,8 @@ import Status from '@/components/Status';
 import StatusOverview from '@/components/StatusOverview';
 import PriorityBreakdown from '@/components/PriorityBreakdown';
 import TypesOfWork from '@/components/TypesOfWork';
+import EpicProgress from '@/components/EpicProgress';
+import TeamWorkload from '@/components/TeamWorkload';
 
 const JiraInterface = () => {
   return (
@@ -21,9 +23,14 @@ const JiraInterface = () => {
         <StatusOverview />
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <PriorityBreakdown />
           <TypesOfWork />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <TeamWorkload />
+          <EpicProgress />
         </div>
       </div>
     </div>

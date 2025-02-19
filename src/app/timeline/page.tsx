@@ -134,7 +134,7 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="text-sm text-gray-600 mb-2">Projects / My Scrum Project</div>
-          <h1 className="text-2xl font-medium">Summary</h1>
+          <h1 className="text-2xl font-medium">Timeline</h1>
         </div>
         <div className="flex items-center space-x-4">
           <button className="text-gray-700 hover:text-gray-900">

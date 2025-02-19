@@ -40,7 +40,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen">
 
           {/* Left Sidebar */}
           <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">

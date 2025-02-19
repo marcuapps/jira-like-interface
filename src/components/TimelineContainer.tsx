@@ -243,7 +243,7 @@ const DayTilesRow: React.FC<DayTilesRowProps> = ({ startDate, endDate }) => {
         {/* Scrollable timeline content */}
         <div 
           ref={scrollContainerRef}
-          className="w-[1300px] overflow-x-auto"
+          className="w-[1300px] overflow-x-auto bg-gray-50"
           style={{ overflowY: 'hidden' }}
         >
           {/* Timeline header */}

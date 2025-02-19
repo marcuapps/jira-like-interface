@@ -1,18 +1,18 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Search, Settings2, Share, Download, MoreHorizontal, Plus, ChevronDown, Info, Maximize2 } from 'lucide-react';
-import { format, addMonths, addWeeks, addQuarters, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { Search, Settings2, Share, Download, MoreHorizontal, ChevronDown, Info, Maximize2 } from 'lucide-react';
+import { addMonths, addWeeks, addQuarters } from 'date-fns';
 import TimelineContainer from '@/components/TimelineContainer';
 import StatusCategoryDropdown from '@/components/StatusCategoryDropdown';
 
 // Types
-interface Epic {
-  id: string;
-  title: string;
-  startDate: Date;
-  endDate: Date;
-  status: 'todo' | 'in_progress' | 'done';
-}
+// interface Epic {
+//   id: string;
+//   title: string;
+//   startDate: Date;
+//   endDate: Date;
+//   status: 'todo' | 'in_progress' | 'done';
+// }
 
 interface TimelineProps {
   projectId: string;
@@ -22,13 +22,11 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
   // States
   const [viewMode, setViewMode] = useState<'Today' | 'Weeks' | 'Months' | 'Quarters'>('Months');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [dateRange, setDateRange] = useState({
     start: new Date(),
     end: addMonths(new Date(), 3)
   });
-  const [epics, setEpics] = useState<Epic[]>([]);
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -64,34 +62,6 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
     setDateRange({ start: today, end });
   }, [viewMode]);
 
-  // Generate timeline dates
-  const timelineDates = eachDayOfInterval({
-    start: startOfMonth(dateRange.start),
-    end: endOfMonth(dateRange.end)
-  });
-
-  // Status filter component
-  const StatusFilter = () => (
-    <div className="relative inline-block">
-      <button className="flex items-center px-3 py-1 text-gray-700 border rounded hover:bg-gray-50">
-        Status category
-        <ChevronDown className="w-4 h-4 ml-1" />
-      </button>
-      <div className="absolute mt-1 bg-white border rounded shadow-lg z-10 w-48 hidden">
-        <div className="p-2">
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" /> <span>To Do</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" /> <span>In Progress</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input type="checkbox" /> <span>Done</span>
-          </label>
-        </div>
-      </div>
-    </div>
-  );
 
   // Settings panel component
   const SettingsPanel = () => (

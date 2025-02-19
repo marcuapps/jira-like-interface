@@ -1,9 +1,9 @@
 import React from 'react';
 import {
-  List,
-  Target,
+  Target
 } from 'lucide-react';
 import Status from '@/components/Status';
+import StatusOverview from '@/components/StatusOverview';
 
 const JiraInterface = () => {
   return (
@@ -19,53 +19,7 @@ const JiraInterface = () => {
         <Status />
 
         {/* Status Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Status overview</h2>
-            <div className="text-gray-600 mb-4">
-              The status overview for this project will display here after you{' '}
-              <a href="#" className="text-blue-600 hover:underline">
-                create some issues
-              </a>
-            </div>
-            <div className="flex justify-center items-center py-8">
-              <div className="text-center">
-                <div className="text-4xl font-medium mb-4">0</div>
-                <div className="text-gray-500">Total issues</div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center text-sm">
-                <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                <span>To Do: 0</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <div className="w-3 h-3 bg-orange-500 rounded mr-2"></div>
-                <span>In Progress: 0</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <div className="w-3 h-3 bg-purple-500 rounded mr-2"></div>
-                <span>Done: 0</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                    <List className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <h3 className="text-lg font-medium">No activity yet</h3>
-                </div>
-                <p className="text-gray-600 max-w-sm">
-                  Create a few issues and invite some teammates to your project to see your project activity.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatusOverview />
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

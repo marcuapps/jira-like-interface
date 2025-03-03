@@ -36,6 +36,7 @@ export interface Epic {
   startDate?: Date;
   endDate?: Date;
   color?: string;
+  isPlaced: boolean;
 }
 
 export interface DayTile {

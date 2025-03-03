@@ -43,6 +43,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   const [timeColumns, setTimeColumns] = useState<Date[]>([]);
   const [draggingEpic, setDraggingEpic] = useState<string | null>(null);
   const [resizingEpic, setResizingEpic] = useState<{ id: string; edge: 'left' | 'right' } | null>(null);
+  const [placingEpic, setPlacingEpic] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState<{ x: number; date: Date } | null>(null);
   const [currentHoverSprint, setCurrentHoverSprint] = useState<string | null>(null);
   const [draggedItemOriginalDates, setDraggedItemOriginalDates] = useState<{
@@ -442,6 +443,7 @@ const handleMouseMove = (event: React.MouseEvent) => {
   
   // Get exact date at current mouse position
   const currentDate = pixelToDate(currentX - scrollOffset);
+  console.log("This is current date: " + dragStart.date)
   
   // Calculate the date difference from the ORIGINAL drag start point
   const dateDiffMs = currentDate.getTime() - dragStart.date.getTime();
@@ -526,6 +528,7 @@ const handleMouseMove = (event: React.MouseEvent) => {
     // Clean up all drag-related state
     setDraggingEpic(null);
     setResizingEpic(null);
+    setPlacingEpic(null);
     setDragStart(null);
     setDraggedItemOriginalDates(null);
     setCurrentHoverSprint(null);
@@ -626,6 +629,59 @@ const handleEpicMouseDown = (
     setDraggingEpic(epicId);
   }
 };
+
+const handlePlacingEpicMouseOver = (
+  event: React.MouseEvent,
+  epicId: string,
+) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const containerRect = containerRef.current?.getBoundingClientRect();
+  if (!containerRect) return;
+  
+  const scrollOffset = timelineRef.current?.scrollLeft || 0;
+  const currentX = event.clientX - containerRect.left + scrollOffset;
+  
+  // Get exact date at current mouse position
+  const currentDate = pixelToDate(currentX - scrollOffset);
+  console.log(currentDate)
+
+  console.log(placingEpic)
+
+    // Create new dates by adding days difference to ORIGINAL dates
+    const newStartDate = new Date();
+    newStartDate.setDate(currentDate.getDate() - 10);
+    
+    const newEndDate = new Date();
+    newEndDate.setDate(currentDate.getDate() + 10);
+    
+    console.log(newStartDate, newEndDate)
+
+    // Update the epic
+    if (onUpdateEpic) {
+      onUpdateEpic(epicId, {
+        startDate: newStartDate,
+        endDate: newEndDate,
+      });
+    }
+  console.log(sprints)
+  console.log("mouse over")
+}
+
+const handleClickOnEpicRow = (
+  event: React.MouseEvent,
+  epicId: string,
+) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (onUpdateEpic) {
+    onUpdateEpic(epicId, {
+      isPlaced: true
+    });
+  }
+}
 
 const handleEnterPress = (value: string) => {
   console.log('Enter pressed with value:', value);
@@ -752,7 +808,7 @@ const handleEnterPress = (value: string) => {
                 </div>
               )}
               
-              {/* Sprint rows */}
+              {/* Epic rows */}
               {sprints[0].epics?.map((epic) => (
                 <div 
                   key={epic.id} 
@@ -760,6 +816,12 @@ const handleEnterPress = (value: string) => {
                   className={`relative border-b border-gray-200 h-12 sprint-row ${
                     currentHoverSprint === epic.id && draggingEpic ? 'bg-blue-50' : ''
                   }`}
+                  onMouseMove={(e) => {
+                    if (!epic.isPlaced) {
+                      handlePlacingEpicMouseOver(e, epic.id)
+                    }
+                  }}
+                  onClick={(e) => handleClickOnEpicRow(e, epic.id)}
                 >
                   <button 
                     className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm py-1 px-3 rounded flex items-center"

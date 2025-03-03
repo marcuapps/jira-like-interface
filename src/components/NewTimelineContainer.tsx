@@ -21,14 +21,16 @@ const NewTimelineContainer: React.FC = () => {
           name: 'Current Feature',
           startDate: new Date(today.getFullYear(), today.getMonth() - 1, 15),
           endDate: new Date(today.getFullYear(), today.getMonth() + 1, 15),
-          color: '#10b981'
+          color: '#10b981',
+          isPlaced: true,
         },
         {
           id: 'epic-3',
           name: 'Current Feature 2',
           startDate: new Date(today.getFullYear(), today.getMonth(), 15),
           endDate: new Date(today.getFullYear(), today.getMonth() + 2, 15),
-          color: '#10b981'
+          color: '#10b981',
+          isPlaced: true,
         },
       ]
     },
@@ -177,9 +179,10 @@ const NewTimelineContainer: React.FC = () => {
     const newEpic: Epic = {
       id: `epic-${Date.now()}`,
       name: name,
-      startDate: new Date(today.getFullYear(), today.getMonth() - 2, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() + 1, 12),
-      color: getRandomColor()
+      // startDate: new Date(today.getFullYear(), today.getMonth() - 2, 1),
+      // endDate: new Date(today.getFullYear(), today.getMonth() + 1, 12),
+      color: getRandomColor(),
+      isPlaced: false,
     };
     
     setSprints(

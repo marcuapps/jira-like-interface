@@ -182,7 +182,7 @@ const scrollToToday = () => {
     // Scroll to center today's position
     const container = timelineRef.current;
     const containerWidth = container.clientWidth;
-    container.scrollLeft = todayPosition - (containerWidth / 2);
+    container.scrollLeft = todayPosition - (containerWidth / 6);
     
     console.log("Scrolling to today at position:", todayPosition);
   }, 100); // Small delay to ensure rendering is complete
@@ -387,14 +387,77 @@ const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
 };
 
 // Update calculateTodayPosition to use the same function
+// Fix the today indicator to correctly show the current day
 const calculateTodayPosition = () => {
-  if (!visibleStartDate || !visibleEndDate) return null;
+  if (!visibleStartDate || !visibleEndDate || timeColumns.length === 0) return null;
   
   // Check if today is within the visible range
   if (today < visibleStartDate || today > visibleEndDate) return null;
   
-  // Use the same positioning function for consistency
-  return `${getPositionForDate(today)}px`;
+  // For quarterly view
+  if (timeUnit === 'Quarters') {
+    // Find which quarter column today belongs to
+    for (let i = 0; i < timeColumns.length; i++) {
+      const quarterStart = new Date(timeColumns[i]);
+      const quarterEnd = new Date(timeColumns[i]);
+      quarterEnd.setMonth(quarterEnd.getMonth() + 3);
+      quarterEnd.setDate(quarterEnd.getDate() - 1);
+      
+      if (today >= quarterStart && today <= quarterEnd) {
+        // Calculate position within the quarter
+        const totalDaysInQuarter = getDaysInQuarter(quarterStart.getFullYear(), Math.floor(quarterStart.getMonth() / 3));
+        const dayOfQuarter = getDayOfQuarter(today);
+        
+        // Position is: column start + percentage through quarter
+        const position = i * columnWidth + (dayOfQuarter / totalDaysInQuarter) * columnWidth;
+        return `${position}px`;
+      }
+    }
+  }
+  
+  // For monthly view
+  else if (timeUnit === 'Months') {
+    // Find which month column today belongs to
+    for (let i = 0; i < timeColumns.length; i++) {
+      const columnDate = timeColumns[i];
+      
+      if (columnDate.getMonth() === today.getMonth() && 
+          columnDate.getFullYear() === today.getFullYear()) {
+        // Calculate position within month (day of month / days in month)
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const position = i * columnWidth + (today.getDate() / daysInMonth) * columnWidth;
+        return `${position}px`;
+      }
+    }
+  }
+  
+  // For weekly view
+  if (timeUnit === 'Weeks') {
+    // Find which week column today belongs to
+    for (let i = 0; i < timeColumns.length; i++) {
+      const columnDate = new Date(timeColumns[i]);
+      
+      // Get the start and end of this week
+      const weekStart = getStartOfWeek(columnDate);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      // Check if today falls within this week
+      if (today >= weekStart && today <= weekEnd) {
+        // Calculate days since week start (0-6)
+        const daysSinceWeekStart = Math.floor((today.getTime() - weekStart.getTime()) / (24 * 60 * 60 * 1000));
+        
+        // Position is: column start + percentage through week
+        const position = i * columnWidth + (daysSinceWeekStart / 7) * columnWidth + 20;
+        return `${position}px`;
+      }
+    }
+  }
+  
+  // Fallback to approximation if we couldn't find the exact column
+  const totalDuration = visibleEndDate.getTime() - visibleStartDate.getTime();
+  const todayOffset = (today.getTime() - visibleStartDate.getTime()) / totalDuration;
+  return `${todayOffset * getTimelineWidth()}px`;
 };
 
   // Find which sprint row we're currently hovering over
@@ -550,23 +613,37 @@ const handleMouseMove = (event: React.MouseEvent) => {
   };
 
 // 3. Add a helper function to check if a column represents the current month/day/etc.
+// Fix for isCurrentTimeUnit to properly identify the current time unit
 const isCurrentTimeUnit = (date: Date) => {
+  // Normalize dates to remove time components
+  const normalizedToday = new Date(today);
+  normalizedToday.setHours(0, 0, 0, 0);
+  
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0);
+  
   if (timeUnit === 'Months') {
-    return date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
+    // For months, check if month and year match
+    return normalizedDate.getMonth() === normalizedToday.getMonth() && 
+           normalizedDate.getFullYear() === normalizedToday.getFullYear();
   } else if (timeUnit === 'Weeks') {
-    // Check if the week contains today
-    const weekStart = new Date(date);
-    const weekEnd = new Date(date);
+    // For weeks, check if today falls within the week
+    const weekStart = getStartOfWeek(normalizedDate);
+    const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
     
-    return today >= weekStart && today <= weekEnd;
+    // Make sure we normalize these dates too
+    weekStart.setHours(0, 0, 0, 0);
+    weekEnd.setHours(23, 59, 59, 999); // End of day
+    
+    return normalizedToday >= weekStart && normalizedToday <= weekEnd;
   } else if (timeUnit === 'Quarters') {
-    const dateQuarter = Math.floor(date.getMonth() / 3);
-    const todayQuarter = Math.floor(today.getMonth() / 3);
+    // For quarters, check if quarter and year match
+    const dateQuarter = Math.floor(normalizedDate.getMonth() / 3);
+    const todayQuarter = Math.floor(normalizedToday.getMonth() / 3);
     
     return dateQuarter === todayQuarter && 
-           date.getFullYear() === today.getFullYear();
+           normalizedDate.getFullYear() === normalizedToday.getFullYear();
   }
   
   return false;

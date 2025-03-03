@@ -202,87 +202,146 @@ const pixelToDate = (pixel: number): Date => {
   return exactDate;
 };
 
-  // Calculate position and width for an epic
-  const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
-    if (!containerRef.current) return {};
+// Add a function to consistently calculate pixel position for any date
+const getPositionForDate = (date: Date): number => {
+  if (!visibleStartDate || !visibleEndDate) return 0;
+  
+  // Calculate days from the start date to this date
+  const daysDiff = Math.round(
+    (date.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
+  );
+  
+  // Calculate total days in the visible range
+  const totalDays = Math.round(
+    (visibleEndDate.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
+  );
+  
+  // Timeline width changes with time unit but the day proportions should remain consistent
+  return (daysDiff / totalDays) * getTimelineWidth();
+};
+
+// First, add a helper function to normalize dates (removes time part)
+const normalizeDate = (date: Date): Date => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+// Then implement a pixel-perfect positioning system
+// Update the calculateItemStyle function with better quarter handling
+
+const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
+  if (!containerRef.current || timeColumns.length === 0) return {};
+  
+  // Normalize dates to midnight
+  const normalizedStart = normalizeDate(itemStart);
+  const normalizedEnd = normalizeDate(itemEnd);
+  
+  // For quarters view - special handling
+  if (timeUnit === 'Quarters') {
+    // Get the real time range of the visible timeline
+    const totalDays = Math.round(
+      (visibleEndDate.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
+    );
     
+    // Calculate days from start date to the item dates
+    const daysFromStartToItemStart = Math.max(0, Math.round(
+      (normalizedStart.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
+    ));
+    
+    const daysFromStartToItemEnd = Math.min(totalDays, Math.round(
+      (normalizedEnd.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
+    ));
+    
+    // Calculate positions as proportion of total timeline width
     const timelineWidth = getTimelineWidth();
-    const totalDuration = visibleEndDate.getTime() - visibleStartDate.getTime();
-    
-    // Calculate position and width, ensuring dates are within visible range
-    const itemStartTime = Math.max(itemStart.getTime(), visibleStartDate.getTime());
-    const itemEndTime = Math.min(itemEnd.getTime(), visibleEndDate.getTime());
-    
-    // Calculate position as percentage of total width
-    const startOffset = (itemStartTime - visibleStartDate.getTime()) / totalDuration;
-    const duration = itemEndTime - itemStartTime;
-    const widthPercentage = duration / totalDuration;
+    const left = (daysFromStartToItemStart / totalDays) * timelineWidth;
+    const width = ((daysFromStartToItemEnd - daysFromStartToItemStart) / totalDays) * timelineWidth;
     
     return {
-      left: `${startOffset * timelineWidth}px`,
-      width: `${Math.max(widthPercentage * timelineWidth, 50)}px`, // Minimum width of 50px
+      left: `${left}px`,
+      width: `${Math.max(width, 50)}px` // Minimum width of 50px
     };
+  }
+  
+  // For other time units - column-based positioning
+  let startColumnIndex = -1;
+  let endColumnIndex = -1;
+  
+  // Find which column contains the start and end dates
+  for (let i = 0; i < timeColumns.length; i++) {
+    const columnDate = normalizeDate(timeColumns[i]);
+    
+    // For months view
+    if (timeUnit === 'Months') {
+      if (columnDate.getMonth() === normalizedStart.getMonth() && 
+          columnDate.getFullYear() === normalizedStart.getFullYear()) {
+        startColumnIndex = i;
+      }
+      
+      if (columnDate.getMonth() === normalizedEnd.getMonth() && 
+          columnDate.getFullYear() === normalizedEnd.getFullYear()) {
+        endColumnIndex = i;
+      }
+    } 
+    // For weeks view
+    else if (timeUnit === 'Weeks') {
+      const weekStart = normalizeDate(getStartOfWeek(timeColumns[i]));
+      const weekEnd = normalizeDate(getEndOfWeek(timeColumns[i]));
+      
+      if (normalizedStart >= weekStart && normalizedStart <= weekEnd) {
+        startColumnIndex = i;
+      }
+      
+      if (normalizedEnd >= weekStart && normalizedEnd <= weekEnd) {
+        endColumnIndex = i;
+      }
+    }
+  }
+  
+  // If columns weren't found, use closest approximation
+  if (startColumnIndex === -1) startColumnIndex = 0;
+  if (endColumnIndex === -1) endColumnIndex = timeColumns.length - 1;
+  
+  // Calculate position within the column
+  let startOffset = 0;
+  let endOffset = columnWidth;
+  
+  if (timeUnit === 'Months') {
+    // Calculate day position within the month
+    const daysInMonth = new Date(normalizedStart.getFullYear(), normalizedStart.getMonth() + 1, 0).getDate();
+    startOffset = (normalizedStart.getDate() - 1) / daysInMonth * columnWidth;
+    
+    const endDaysInMonth = new Date(normalizedEnd.getFullYear(), normalizedEnd.getMonth() + 1, 0).getDate();
+    endOffset = normalizedEnd.getDate() / endDaysInMonth * columnWidth;
+  } else if (timeUnit === 'Weeks') {
+    // Calculate day position within the week (0-6)
+    const dayOfWeek = normalizedStart.getDay() === 0 ? 6 : normalizedStart.getDay() - 1; // Convert to 0=Monday
+    startOffset = dayOfWeek / 7 * columnWidth;
+    
+    const endDayOfWeek = normalizedEnd.getDay() === 0 ? 6 : normalizedEnd.getDay() - 1;
+    endOffset = (endDayOfWeek + 1) / 7 * columnWidth; // +1 to include the full end day
+  }
+  
+  // Calculate final position and width
+  const left = startColumnIndex * columnWidth + startOffset;
+  const right = endColumnIndex * columnWidth + endOffset;
+  
+  return {
+    left: `${left}px`,
+    width: `${Math.max(right - left, 50)}px`, // Minimum width
   };
+};
 
-// 1. Update the calculateTodayPosition function to be more precise
+// Update calculateTodayPosition to use the same function
 const calculateTodayPosition = () => {
   if (!visibleStartDate || !visibleEndDate) return null;
   
   // Check if today is within the visible range
   if (today < visibleStartDate || today > visibleEndDate) return null;
   
-  // For more precise positioning in different time units
-  if (timeUnit === 'Months') {
-    // Find which month column today belongs to
-    const monthIndex = timeColumns.findIndex(col => 
-      col.getMonth() === today.getMonth() && 
-      col.getFullYear() === today.getFullYear()
-    );
-
-    const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-
-    if (monthIndex !== -1) {
-      // Position at the start of the month (plus a small offset if it's not the 1st)
-      // return `${monthIndex * columnWidth}px`;
-      return `${monthIndex * columnWidth + today.getDate() / totalDays * columnWidth}px`;
-    }
-  } else if (timeUnit === 'Weeks') {
-    // For week view, find the week that contains today
-    const weekIndex = timeColumns.findIndex(col => {
-      // Create date range for the week
-      const weekStart = new Date(col);
-      const weekEnd = new Date(col);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      
-      return today >= weekStart && today <= weekEnd;
-    });
-    
-    if (weekIndex !== -1) {
-      return `${(weekIndex + 1) * columnWidth + today.getDay() / 7 * columnWidth - 10}px`;
-    }
-  } else if (timeUnit === 'Quarters') {
-    // For quarter view
-    const todayQuarter = Math.floor(today.getMonth() / 3);
-    const todayYear = today.getFullYear();
-    
-    const quarterIndex = timeColumns.findIndex(col => {
-      const colQuarter = Math.floor(col.getMonth() / 3);
-      const colYear = col.getFullYear();
-      
-      return colQuarter === todayQuarter && colYear === todayYear;
-    });
-
-    if (quarterIndex !== -1) {
-      return `${quarterIndex * columnWidth + getQuarterProgress(today) * columnWidth}px`;
-    }
-  }
-  
-  // Fallback to the original calculation if the above methods fail
-  const totalDuration = visibleEndDate.getTime() - visibleStartDate.getTime();
-  const offset = (today.getTime() - visibleStartDate.getTime()) / totalDuration;
-  const timelineWidth = getTimelineWidth();
-  
-  return `${Math.floor(offset * timelineWidth)}px`;
+  // Use the same positioning function for consistency
+  return `${getPositionForDate(today)}px`;
 };
 
   // Find which sprint row we're currently hovering over

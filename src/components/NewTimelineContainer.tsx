@@ -22,15 +22,15 @@ const NewTimelineContainer: React.FC = () => {
           startDate: new Date(today.getFullYear(), today.getMonth() - 1, 15),
           endDate: new Date(today.getFullYear(), today.getMonth() + 1, 15),
           color: '#10b981'
-        }
+        },
+        {
+          id: 'epic-3',
+          name: 'Current Feature 2',
+          startDate: new Date(today.getFullYear(), today.getMonth(), 15),
+          endDate: new Date(today.getFullYear(), today.getMonth() + 2, 15),
+          color: '#10b981'
+        },
       ]
-    },
-    {
-      id: 'sprint-next-1',
-      name: 'Next Sprint 1',
-      startDate: new Date(today.getFullYear(), today.getMonth() + 1, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() + 1, 14),
-      epics: []
     },
   ]);
 
@@ -169,14 +169,16 @@ const NewTimelineContainer: React.FC = () => {
   
 
   // Create new sprint
-  const handleCreateSprint = (sprintId: string) => {
+  const handleCreateNewEpic = (sprintId: string, name: string) => {
     const sprint = sprints.find(s => s.id === sprintId);
     if (!sprint) return;
     
     // Create sprint with default 2 week duration
     const newEpic: Epic = {
       id: `epic-${Date.now()}`,
-      name: `New Epic ${Math.floor(Math.random() * 1000)}`,
+      name: name,
+      startDate: new Date(today.getFullYear(), today.getMonth() - 2, 1),
+      endDate: new Date(today.getFullYear(), today.getMonth() + 1, 12),
       color: getRandomColor()
     };
     
@@ -215,7 +217,7 @@ const NewTimelineContainer: React.FC = () => {
             onCreateEpic={handleCreateEpic}
             onUpdateEpic={handleUpdateEpic}
             onDeleteEpic={handleDeleteEpic}
-            onCreateSprint={handleCreateSprint}
+            onCreateNewEpic={handleCreateNewEpic}
           />
         </div>
       </div>

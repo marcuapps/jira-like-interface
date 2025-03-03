@@ -5,7 +5,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sprint, Epic } from '@/lib/types';
 import { getQuarterProgress } from '@/utils/dateUtils';
 import DayTilesRow from './DayTilesRow';
-import { ChevronDown, Maximize2, Info } from 'lucide-react';
+import { ChevronDown, Maximize2, Info, FileQuestion } from 'lucide-react';
+import EpicNameTextInput from './EpicNameTextInput';
 
 type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
 
@@ -14,7 +15,7 @@ interface ScrollableTimelineViewProps {
   onCreateEpic?: (sprintId: string) => void;
   onUpdateEpic?: (epicId: string, updates: Partial<Epic>) => void;
   onDeleteEpic?: (epicId: string) => void;
-  onCreateSprint?: (sprintId: string) => void;
+  onCreateNewEpic?: (sprintId: string, name: string) => void;
 }
 
 const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
@@ -22,7 +23,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   onCreateEpic,
   onUpdateEpic,
   onDeleteEpic,
-  onCreateSprint,
+  onCreateNewEpic,
 }) => {
   // Get today's date
   const today = new Date();
@@ -34,6 +35,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   const defaultEndDate = new Date(today);
   defaultEndDate.setFullYear(today.getFullYear() + 2);
   
+  const [inputValue, setInputValue] = useState('');
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('Months');
   const [visibleStartDate, setVisibleStartDate] = useState<Date>(new Date(defaultStartDate));
   const [visibleEndDate, setVisibleEndDate] = useState<Date>(new Date(defaultEndDate));
@@ -497,8 +499,20 @@ const handleEpicMouseDown = (
 };
 
 const handleAddSprint = (sprintId: string) => {
-  onCreateSprint && onCreateSprint(sprintId);
+  // onCreateSprint && onCreateSprint(sprintId);
+  onCreateNewEpic && onCreateNewEpic(sprintId);
 }
+
+const handleEnterPress = (value: string) => {
+  console.log('Enter pressed with value:', value);
+  // Add your action logic here
+  // For example: submit the form, add a todo item, etc.
+
+  onCreateNewEpic && onCreateNewEpic(sprints[0].id, value);
+
+  // Optionally clear the input after action
+  setInputValue('');
+};
 
   return (
     <div className="flex flex-col border border-gray-200 rounded">
@@ -514,7 +528,7 @@ const handleAddSprint = (sprintId: string) => {
           {/* Headers that scroll with content */}
           <div className="flex border-b border-gray-200">
             {/* Fixed left sidebar */}
-            <div className="flex-shrink-0 w-48 border-r border-gray-200 bg-white sticky left-0 z-20">
+            <div className="flex-shrink-0 w-96 border-r border-gray-200 bg-white sticky left-0 z-20">
               <div className="h-8"></div>
             </div>
             
@@ -548,7 +562,7 @@ const handleAddSprint = (sprintId: string) => {
           {/* Content area */}
           <div className="flex">
             {/* Fixed sprint names sidebar */}
-            <div className="flex-shrink-0 w-48 border-r border-gray-200 sticky left-0 bg-white z-10">
+            {/* <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-10">
               {sprints.map((sprint) => (
                 <div 
                   key={sprint.id} 
@@ -562,6 +576,39 @@ const handleAddSprint = (sprintId: string) => {
                   className='py-1 rounded text-gray-700 hover:bg-gray-50'
                   onClick={() => handleAddSprint(sprints[0].id)}
                 >+ Add epic</button>
+              </div>
+              <div>
+              <EpicNameTextInput
+                  icon={<FileQuestion />}
+                  placeholder="What needs to be done?"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onEnter={handleEnterPress}
+                />
+              </div>
+            </div> */}
+
+            <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-10">
+              {sprints.map((sprint) => (
+                <div key={sprint.id}>
+                  {sprint.epics?.map((epic) => (
+                    <div 
+                      key={epic.id} 
+                      className="p-4 border-b border-gray-200 h-12 flex items-center"
+                    >
+                      <div className="font-medium">{epic.name}</div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+              <div className='p-2'>
+                <EpicNameTextInput
+                  icon={<FileQuestion />}
+                  placeholder="What needs to be done?"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onEnter={handleEnterPress}
+                />
               </div>
             </div>
             
@@ -597,71 +644,76 @@ const handleAddSprint = (sprintId: string) => {
               )}
               
               {/* Sprint rows */}
-              {sprints.map((sprint) => (
+              {sprints[0].epics?.map((epic) => (
                 <div 
-                  key={sprint.id} 
-                  data-sprint-id={sprint.id}
+                  key={epic.id} 
+                  data-sprint-id={epic.id}
                   className={`relative border-b border-gray-200 h-12 sprint-row ${
-                    currentHoverSprint === sprint.id && draggingEpic ? 'bg-blue-50' : ''
+                    currentHoverSprint === epic.id && draggingEpic ? 'bg-blue-50' : ''
                   }`}
                 >
                   <button 
                     className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm py-1 px-3 rounded flex items-center"
-                    onClick={() => onCreateEpic && onCreateEpic(sprint.id)}
+                    onClick={() => onCreateEpic && onCreateEpic(epic.id)}
                   >
                     <span className="mr-1">+</span> Create Epic
                   </button>
                   
+
+
+                  {/* Render single epic directly */}
+                  {epic.startDate && epic.endDate && (
+                    (() => {
+                      const style = calculateItemStyle(epic.startDate, epic.endDate);
+                      const isDragging = draggingEpic === epic.id;
+                      const isResizing = resizingEpic?.id === epic.id;
+                      
+                      return (
+                        <div
+                          key={epic.id}
+                          className={`absolute top-1/2 transform -translate-y-1/2 h-6 rounded text-white px-3 flex items-center overflow-hidden 
+                                    ${isDragging || isResizing ? 'opacity-70 shadow-lg z-10 cursor-move' : 'cursor-pointer hover:brightness-90'}`}
+                          style={{
+                            ...style,
+                            backgroundColor: epic.color || '#3b82f6'
+                          }}
+                          onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'center')}
+                        >
+                          {/* Left resize handle */}
+                          <div 
+                            className="absolute left-0 top-0 w-2 h-full cursor-ew-resize"
+                            onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'left')}
+                          ></div>
+                          
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                            {/* {epic.name} */}
+                          </span>
+                          
+                          {/* Right resize handle */}
+                          <div 
+                            className="absolute right-0 top-0 w-2 h-full cursor-ew-resize"
+                            onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'right')}
+                          ></div>
+                          
+                          {/* Delete button */}
+                          {onDeleteEpic && (
+                            <button
+                              className="absolute right-1 top-1 w-4 h-4 flex items-center justify-center rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteEpic(epic.id);
+                              }}
+                            >
+                              <span className="text-xs">×</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()
+                  )}
+
                   {/* Epics in this sprint */}
-                  {sprint.epics?.map((epic) => {
-                    if (epic.startDate && epic.endDate) {
-                    const style = calculateItemStyle(epic.startDate, epic.endDate);
-                    const isDragging = draggingEpic === epic.id;
-                    const isResizing = resizingEpic?.id === epic.id;
-                    
-                    return (
-                      <div
-                        key={epic.id}
-                        className={`absolute top-1/2 transform -translate-y-1/2 h-6 rounded text-white px-3 flex items-center overflow-hidden 
-                                  ${isDragging || isResizing ? 'opacity-70 shadow-lg z-10 cursor-move' : 'cursor-pointer hover:brightness-90'}`}
-                        style={{
-                          ...style,
-                          backgroundColor: epic.color || '#3b82f6'
-                        }}
-                        onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'center')}
-                      >
-                        {/* Left resize handle */}
-                        <div 
-                          className="absolute left-0 top-0 w-2 h-full cursor-ew-resize"
-                          onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'left')}
-                        ></div>
-                        
-                        <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                          {/* {epic.name} */}
-                        </span>
-                        
-                        {/* Right resize handle */}
-                        <div 
-                          className="absolute right-0 top-0 w-2 h-full cursor-ew-resize"
-                          onMouseDown={(e) => handleEpicMouseDown(e, epic.id, 'right')}
-                        ></div>
-                        
-                        {/* Delete button */}
-                        {onDeleteEpic && (
-                          <button
-                            className="absolute right-1 top-1 w-4 h-4 flex items-center justify-center rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteEpic(epic.id);
-                            }}
-                          >
-                            <span className="text-xs">×</span>
-                          </button>
-                        )}
-                      </div>
-                    );
-                  }
-                  })}
+
                 </div>
               ))}
             </div>

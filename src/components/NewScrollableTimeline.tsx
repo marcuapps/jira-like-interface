@@ -14,6 +14,7 @@ interface ScrollableTimelineViewProps {
   onCreateEpic?: (sprintId: string) => void;
   onUpdateEpic?: (epicId: string, updates: Partial<Epic>) => void;
   onDeleteEpic?: (epicId: string) => void;
+  onCreateSprint?: (sprintId: string) => void;
 }
 
 const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
@@ -21,6 +22,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   onCreateEpic,
   onUpdateEpic,
   onDeleteEpic,
+  onCreateSprint,
 }) => {
   // Get today's date
   const today = new Date();
@@ -494,6 +496,10 @@ const handleEpicMouseDown = (
   }
 };
 
+const handleAddSprint = (sprintId: string) => {
+  onCreateSprint && onCreateSprint(sprintId);
+}
+
   return (
     <div className="flex flex-col border border-gray-200 rounded">
       {/* Single scrollable container that includes both header and content */}
@@ -546,11 +552,17 @@ const handleEpicMouseDown = (
               {sprints.map((sprint) => (
                 <div 
                   key={sprint.id} 
-                  className="p-4 border-b border-gray-200 h-20 flex items-center"
+                  className="p-4 border-b border-gray-200 h-12 flex items-center"
                 >
                   <div className="font-medium">{sprint.name}</div>
                 </div>
               ))}
+              <div className="p-4 border-b border-gray-200 h-12 flex items-center">
+                <button
+                  className='py-1 rounded text-gray-700 hover:bg-gray-50'
+                  onClick={() => handleAddSprint(sprints[0].id)}
+                >+ Add epic</button>
+              </div>
             </div>
             
             {/* Scrollable timeline grid */}
@@ -589,7 +601,7 @@ const handleEpicMouseDown = (
                 <div 
                   key={sprint.id} 
                   data-sprint-id={sprint.id}
-                  className={`relative border-b border-gray-200 h-20 sprint-row ${
+                  className={`relative border-b border-gray-200 h-12 sprint-row ${
                     currentHoverSprint === sprint.id && draggingEpic ? 'bg-blue-50' : ''
                   }`}
                 >
@@ -602,6 +614,7 @@ const handleEpicMouseDown = (
                   
                   {/* Epics in this sprint */}
                   {sprint.epics?.map((epic) => {
+                    if (epic.startDate && epic.endDate) {
                     const style = calculateItemStyle(epic.startDate, epic.endDate);
                     const isDragging = draggingEpic === epic.id;
                     const isResizing = resizingEpic?.id === epic.id;
@@ -609,7 +622,7 @@ const handleEpicMouseDown = (
                     return (
                       <div
                         key={epic.id}
-                        className={`absolute top-1/2 transform -translate-y-1/2 h-10 rounded text-white px-3 flex items-center overflow-hidden 
+                        className={`absolute top-1/2 transform -translate-y-1/2 h-6 rounded text-white px-3 flex items-center overflow-hidden 
                                   ${isDragging || isResizing ? 'opacity-70 shadow-lg z-10 cursor-move' : 'cursor-pointer hover:brightness-90'}`}
                         style={{
                           ...style,
@@ -624,7 +637,7 @@ const handleEpicMouseDown = (
                         ></div>
                         
                         <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                          {epic.name}
+                          {/* {epic.name} */}
                         </span>
                         
                         {/* Right resize handle */}
@@ -647,6 +660,7 @@ const handleEpicMouseDown = (
                         )}
                       </div>
                     );
+                  }
                   })}
                 </div>
               ))}

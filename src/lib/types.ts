@@ -31,8 +31,8 @@ export interface Sprint {
 export interface Epic {
   id: string;
   name: string;
-  startDate: Date;
-  endDate: Date;
+  startDate?: Date;
+  endDate?: Date;
   color?: string;
 }
 

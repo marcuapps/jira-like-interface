@@ -7,38 +7,9 @@ import { Sprint, Epic } from '@/lib/types';
 const NewTimelineContainer: React.FC = () => {
   // Sample data 
   const today = new Date();
-  
+
   const [sprints, setSprints] = useState<Sprint[]>([
     // Generate multiple sprints spanning past and future
-    {
-      id: 'sprint-past-3',
-      name: 'Past Sprint 3',
-      startDate: new Date(today.getFullYear(), today.getMonth() - 6, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() - 5, 14),
-      epics: [
-        {
-          id: 'epic-1',
-          name: 'Foundation Setup',
-          startDate: new Date(today.getFullYear(), today.getMonth() - 6, 1),
-          endDate: new Date(today.getFullYear(), today.getMonth() - 4, 15),
-          color: '#4f46e5'
-        }
-      ]
-    },
-    {
-      id: 'sprint-past-2',
-      name: 'Past Sprint 2',
-      startDate: new Date(today.getFullYear(), today.getMonth() - 4, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() - 3, 14),
-      epics: []
-    },
-    {
-      id: 'sprint-past-1',
-      name: 'Past Sprint 1',
-      startDate: new Date(today.getFullYear(), today.getMonth() - 2, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() - 1, 14),
-      epics: []
-    },
     {
       id: 'sprint-current',
       name: 'Current Sprint',
@@ -61,36 +32,91 @@ const NewTimelineContainer: React.FC = () => {
       endDate: new Date(today.getFullYear(), today.getMonth() + 1, 14),
       epics: []
     },
-    {
-      id: 'sprint-next-2',
-      name: 'Next Sprint 2',
-      startDate: new Date(today.getFullYear(), today.getMonth() + 2, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() + 2, 14),
-      epics: [
-        {
-          id: 'epic-3',
-          name: 'Future Feature',
-          startDate: new Date(today.getFullYear(), today.getMonth() + 2, 1),
-          endDate: new Date(today.getFullYear(), today.getMonth() + 4, 15),
-          color: '#f59e0b'
-        }
-      ]
-    },
-    {
-      id: 'sprint-next-3',
-      name: 'Next Sprint 3',
-      startDate: new Date(today.getFullYear(), today.getMonth() + 3, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() + 3, 14),
-      epics: []
-    },
-    {
-      id: 'sprint-next-4',
-      name: 'Next Sprint 4',
-      startDate: new Date(today.getFullYear(), today.getMonth() + 4, 1),
-      endDate: new Date(today.getFullYear(), today.getMonth() + 4, 14),
-      epics: []
-    }
   ]);
+
+  // const [sprints, setSprints] = useState<Sprint[]>([
+  //   // Generate multiple sprints spanning past and future
+  //   {
+  //     id: 'sprint-past-3',
+  //     name: 'Past Sprint 3',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() - 6, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() - 5, 14),
+  //     epics: [
+  //       {
+  //         id: 'epic-1',
+  //         name: 'Foundation Setup',
+  //         startDate: new Date(today.getFullYear(), today.getMonth() - 6, 1),
+  //         endDate: new Date(today.getFullYear(), today.getMonth() - 4, 15),
+  //         color: '#4f46e5'
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     id: 'sprint-past-2',
+  //     name: 'Past Sprint 2',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() - 4, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() - 3, 14),
+  //     epics: []
+  //   },
+  //   {
+  //     id: 'sprint-past-1',
+  //     name: 'Past Sprint 1',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() - 2, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() - 1, 14),
+  //     epics: []
+  //   },
+  //   {
+  //     id: 'sprint-current',
+  //     name: 'Current Sprint',
+  //     startDate: new Date(today.getFullYear(), today.getMonth(), 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth(), 14),
+  //     epics: [
+  //       {
+  //         id: 'epic-2',
+  //         name: 'Current Feature',
+  //         startDate: new Date(today.getFullYear(), today.getMonth() - 1, 15),
+  //         endDate: new Date(today.getFullYear(), today.getMonth() + 1, 15),
+  //         color: '#10b981'
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     id: 'sprint-next-1',
+  //     name: 'Next Sprint 1',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() + 1, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() + 1, 14),
+  //     epics: []
+  //   },
+  //   {
+  //     id: 'sprint-next-2',
+  //     name: 'Next Sprint 2',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() + 2, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() + 2, 14),
+  //     epics: [
+  //       {
+  //         id: 'epic-3',
+  //         name: 'Future Feature',
+  //         startDate: new Date(today.getFullYear(), today.getMonth() + 2, 1),
+  //         endDate: new Date(today.getFullYear(), today.getMonth() + 4, 15),
+  //         color: '#f59e0b'
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     id: 'sprint-next-3',
+  //     name: 'Next Sprint 3',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() + 3, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() + 3, 14),
+  //     epics: []
+  //   },
+  //   {
+  //     id: 'sprint-next-4',
+  //     name: 'Next Sprint 4',
+  //     startDate: new Date(today.getFullYear(), today.getMonth() + 4, 1),
+  //     endDate: new Date(today.getFullYear(), today.getMonth() + 4, 14),
+  //     epics: []
+  //   }
+  // ]);
 
   // Create a new epic
   const handleCreateEpic = (sprintId: string) => {
@@ -140,6 +166,28 @@ const NewTimelineContainer: React.FC = () => {
       }))
     );
   };
+  
+
+  // Create new sprint
+  const handleCreateSprint = (sprintId: string) => {
+    const sprint = sprints.find(s => s.id === sprintId);
+    if (!sprint) return;
+    
+    // Create sprint with default 2 week duration
+    const newEpic: Epic = {
+      id: `epic-${Date.now()}`,
+      name: `New Epic ${Math.floor(Math.random() * 1000)}`,
+      color: getRandomColor()
+    };
+    
+    setSprints(
+      sprints.map(s => 
+        s.id === sprintId 
+          ? { ...s, epics: [...(s.epics || []), newEpic] }
+          : s
+      )
+    );
+  };
 
   // Helper function to generate random colors
   function getRandomColor(): string {
@@ -167,6 +215,7 @@ const NewTimelineContainer: React.FC = () => {
             onCreateEpic={handleCreateEpic}
             onUpdateEpic={handleUpdateEpic}
             onDeleteEpic={handleDeleteEpic}
+            onCreateSprint={handleCreateSprint}
           />
         </div>
       </div>

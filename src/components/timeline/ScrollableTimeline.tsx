@@ -4,20 +4,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sprint, Epic } from '@/lib/types';
 import { getStartOfWeek, getEndOfWeek, getDaysInQuarter, getDayOfQuarter, normalizeDate } from '@/utils/dateUtils';
-import DayTilesRow from './DayTilesRow';
-import { ChevronDown, Maximize2, Info, FileQuestion } from 'lucide-react';
-import EpicNameTextInput from './EpicNameTextInput';
+import DayTilesRow from '../DayTilesRow';
+import { FileQuestion } from 'lucide-react';
+import EpicNameTextInput from '../EpicNameTextInput';
 import { TimeUnit } from '@/lib/types';
-import TimelineControls from './timeline/TimelineControls';
+import TimelineControls from './TimelineControls';
 
 // type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
 
 interface ScrollableTimelineViewProps {
   sprints: Sprint[];
-  onCreateEpic?: (sprintId: string) => void;
+  onCreateEpic?: (sprintId: string, name: string) => void;
   onUpdateEpic?: (epicId: string, updates: Partial<Epic>) => void;
   onDeleteEpic?: (epicId: string) => void;
-  onCreateNewEpic?: (sprintId: string, name: string) => void;
+  // onCreateNewEpic?: (sprintId: string, name: string) => void;
 }
 
 const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
@@ -25,7 +25,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   onCreateEpic,
   onUpdateEpic,
   onDeleteEpic,
-  onCreateNewEpic,
+  // onCreateNewEpic,
 }) => {
   // Get today's date
   const today = new Date();
@@ -685,7 +685,7 @@ const handleClickOnEpicRow = (
 }
 
 const handleEnterPress = (value: string) => {
-  onCreateNewEpic && onCreateNewEpic(sprints[0].id, value);
+  onCreateEpic && onCreateEpic(sprints[0].id, value);
   setInputValue('');
   setTextInputIsVisible(false)
 };

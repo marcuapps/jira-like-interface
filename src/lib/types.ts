@@ -20,6 +20,8 @@
 //   status: 'todo' | 'in_progress' | 'done';
 // }
 
+export type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
+
 export interface Sprint {
   id: string;
   name: string;

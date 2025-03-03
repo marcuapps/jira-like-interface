@@ -3,12 +3,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Sprint, Epic } from '@/lib/types';
-import { getQuarterProgress } from '@/utils/dateUtils';
+import { getStartOfWeek, getEndOfWeek, getDaysInQuarter, getDayOfQuarter, normalizeDate } from '@/utils/dateUtils';
 import DayTilesRow from './DayTilesRow';
 import { ChevronDown, Maximize2, Info, FileQuestion } from 'lucide-react';
 import EpicNameTextInput from './EpicNameTextInput';
+import { TimeUnit } from '@/lib/types';
 
-type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
+// type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
 
 interface ScrollableTimelineViewProps {
   sprints: Sprint[];
@@ -211,49 +212,6 @@ const pixelToDate = (pixel: number): Date => {
   
   return exactDate;
 };
-
-// Add a function to consistently calculate pixel position for any date
-const getPositionForDate = (date: Date): number => {
-  if (!visibleStartDate || !visibleEndDate) return 0;
-  
-  // Calculate days from the start date to this date
-  const daysDiff = Math.round(
-    (date.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
-  );
-  
-  // Calculate total days in the visible range
-  const totalDays = Math.round(
-    (visibleEndDate.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
-  );
-  
-  // Timeline width changes with time unit but the day proportions should remain consistent
-  return (daysDiff / totalDays) * getTimelineWidth();
-};
-
-// First, add a helper function to normalize dates (removes time part)
-const normalizeDate = (date: Date): Date => {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized;
-};
-
-// Then implement a pixel-perfect positioning system
-// Update the calculateItemStyle function with better quarter handling
-
-// Helper functions for quarter calculations
-function getDaysInQuarter(year: number, quarter: number): number {
-  // Get days in each month of the quarter
-  const month1 = new Date(year, quarter * 3 + 1, 0).getDate(); // Last day of 1st month
-  const month2 = new Date(year, quarter * 3 + 2, 0).getDate(); // Last day of 2nd month
-  const month3 = new Date(year, quarter * 3 + 3, 0).getDate(); // Last day of 3rd month
-  return month1 + month2 + month3;
-}
-
-function getDayOfQuarter(date: Date): number {
-  const quarter = Math.floor(date.getMonth() / 3);
-  const firstDayOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
-  return Math.round((date.getTime() - firstDayOfQuarter.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-}
 
 const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
   if (!containerRef.current || timeColumns.length === 0) return {};
@@ -573,24 +531,6 @@ const handleMouseMove = (event: React.MouseEvent) => {
     setCurrentHoverSprint(null);
   };
 
-  // Helper function to get the start date of a week
-  const getStartOfWeek = (date: Date): Date => {
-    const result = new Date(date);
-    const day = result.getDay();
-    const diff = day === 0 ? 6 : day - 1; // Make Monday the first day of the week
-    result.setDate(result.getDate() - diff);
-    return result;
-  };
-
-  // Helper function to get the end date of a week
-  const getEndOfWeek = (date: Date): Date => {
-    const result = new Date(date);
-    const day = result.getDay();
-    const diff = day === 0 ? 0 : 7 - day; // Make Sunday the last day of the week
-    result.setDate(result.getDate() + diff);
-    return result;
-  };
-
   // Format column date based on time unit
   const formatColumnDate = (date: Date) => {
     switch (timeUnit) {
@@ -648,7 +588,6 @@ const isCurrentTimeUnit = (date: Date) => {
   
   return false;
 };
-
 
 // 2. Update the handleEpicMouseDown function to store original positions
 const handleEpicMouseDown = (

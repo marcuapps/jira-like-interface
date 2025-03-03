@@ -1,4 +1,5 @@
 // utils/dateUtils.ts
+
 export const dateFormatOptions = {
   day: { day: '2-digit' } as Intl.DateTimeFormatOptions,
   week: { week: 'numeric', year: 'numeric' } as Intl.DateTimeFormatOptions,
@@ -78,44 +79,41 @@ export const getRandomColor = (): string => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const getDayOfQuarter = (date = new Date()) => {
-  // Get current quarter (0-3)
-  const quarter = Math.floor(date.getMonth() / 3);
-  
-  // First day of the current quarter
-  const firstDayOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
-  
-  // Calculate difference in days
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-  const dayDifference = Math.floor(
-    (date.getTime() - firstDayOfQuarter.getTime()) / millisecondsPerDay
-  );
-  
-  // Return the day of quarter (1-based)
-  return dayDifference + 1;
+export const normalizeDate = (date: Date): Date => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
 };
 
-const getDaysInQuarter = (date = new Date()) => {
-  const quarter = Math.floor(date.getMonth() / 3);
-  
-  // First day of the current quarter
-  const firstDayOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
-  
-  // First day of the next quarter
-  const firstDayOfNextQuarter = new Date(date.getFullYear(), (quarter + 1) * 3, 1);
-  
-  // Calculate difference in days
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-  const dayDifference = Math.floor(
-    (firstDayOfNextQuarter.getTime() - firstDayOfQuarter.getTime()) / millisecondsPerDay
-  );
-  
-  return dayDifference;
-};
+  // Helper function to get the start date of a week
+export const getStartOfWeek = (date: Date): Date => {
+    const result = new Date(date);
+    const day = result.getDay();
+    const diff = day === 0 ? 6 : day - 1; // Make Monday the first day of the week
+    result.setDate(result.getDate() - diff);
+    return result;
+  };
 
-export const getQuarterProgress = (date = new Date()) => {
-  const day = getDayOfQuarter(date);
-  const totalDays = getDaysInQuarter(date);
-  
-  return (day / totalDays);
-};
+  // Helper function to get the end date of a week
+ export const getEndOfWeek = (date: Date): Date => {
+    const result = new Date(date);
+    const day = result.getDay();
+    const diff = day === 0 ? 0 : 7 - day; // Make Sunday the last day of the week
+    result.setDate(result.getDate() + diff);
+    return result;
+  };
+
+// Helper functions for quarter calculations
+export function getDaysInQuarter(year: number, quarter: number): number {
+  // Get days in each month of the quarter
+  const month1 = new Date(year, quarter * 3 + 1, 0).getDate(); // Last day of 1st month
+  const month2 = new Date(year, quarter * 3 + 2, 0).getDate(); // Last day of 2nd month
+  const month3 = new Date(year, quarter * 3 + 3, 0).getDate(); // Last day of 3rd month
+  return month1 + month2 + month3;
+}
+
+export function getDayOfQuarter(date: Date): number {
+  const quarter = Math.floor(date.getMonth() / 3);
+  const firstDayOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
+  return Math.round((date.getTime() - firstDayOfQuarter.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+}

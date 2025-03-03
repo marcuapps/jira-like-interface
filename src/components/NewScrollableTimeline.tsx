@@ -74,29 +74,39 @@ useEffect(() => {
   if (!visibleStartDate || !visibleEndDate) return;
   
   const columns: Date[] = [];
-  const current = new Date(visibleStartDate);
   
-  // Generate appropriate number of columns based on time unit
-  while (current <= visibleEndDate) {
-    columns.push(new Date(current));
+  if (timeUnit === 'Quarters') {
+    // Start at the beginning of the quarter
+    let current = new Date(visibleStartDate);
+    const quarterMonth = Math.floor(current.getMonth() / 3) * 3;
+    current = new Date(current.getFullYear(), quarterMonth, 1);
     
-    switch (timeUnit) {
-      case 'Weeks':
-        current.setDate(current.getDate() + 7);
-        break;
-      case 'Months':
-        current.setMonth(current.getMonth() + 1);
-        break;
-      case 'Quarters':
-        current.setMonth(current.getMonth() + 3);
-        break;
+    // Generate quarter columns
+    while (current <= visibleEndDate) {
+      columns.push(new Date(current));
+      current.setMonth(current.getMonth() + 3);
+    }
+  } else {
+    // For weeks and months, use existing logic
+    let current = new Date(visibleStartDate);
+    
+    while (current <= visibleEndDate) {
+      columns.push(new Date(current));
+      
+      switch (timeUnit) {
+        case 'Weeks':
+          current.setDate(current.getDate() + 7);
+          break;
+        case 'Months':
+          current.setMonth(current.getMonth() + 1);
+          break;
+      }
     }
   }
-
-  console.log(columns)
   
+  console.log(columns);
   setTimeColumns(columns);
-}, [timeUnit, visibleStartDate, visibleEndDate]); // Depend on timeUnit and the date range
+}, [timeUnit, visibleStartDate, visibleEndDate]);// Depend on timeUnit and the date range
 
 // Fixed width for all time units
 const columnWidth = 200; // pixels
@@ -230,6 +240,21 @@ const normalizeDate = (date: Date): Date => {
 // Then implement a pixel-perfect positioning system
 // Update the calculateItemStyle function with better quarter handling
 
+// Helper functions for quarter calculations
+function getDaysInQuarter(year: number, quarter: number): number {
+  // Get days in each month of the quarter
+  const month1 = new Date(year, quarter * 3 + 1, 0).getDate(); // Last day of 1st month
+  const month2 = new Date(year, quarter * 3 + 2, 0).getDate(); // Last day of 2nd month
+  const month3 = new Date(year, quarter * 3 + 3, 0).getDate(); // Last day of 3rd month
+  return month1 + month2 + month3;
+}
+
+function getDayOfQuarter(date: Date): number {
+  const quarter = Math.floor(date.getMonth() / 3);
+  const firstDayOfQuarter = new Date(date.getFullYear(), quarter * 3, 1);
+  return Math.round((date.getTime() - firstDayOfQuarter.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+}
+
 const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
   if (!containerRef.current || timeColumns.length === 0) return {};
   
@@ -239,28 +264,56 @@ const calculateItemStyle = (itemStart: Date, itemEnd: Date) => {
   
   // For quarters view - special handling
   if (timeUnit === 'Quarters') {
-    // Get the real time range of the visible timeline
-    const totalDays = Math.round(
-      (visibleEndDate.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
-    );
+    // Find which quarter columns the start and end dates belong to
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
     
-    // Calculate days from start date to the item dates
-    const daysFromStartToItemStart = Math.max(0, Math.round(
-      (normalizedStart.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
-    ));
+    for (let i = 0; i < timeColumns.length; i++) {
+      const quarterStart = new Date(timeColumns[i]); // First day of quarter
+      const quarterEnd = new Date(timeColumns[i]);
+      quarterEnd.setMonth(quarterEnd.getMonth() + 3);
+      quarterEnd.setDate(quarterEnd.getDate() - 1); // Last day of quarter
+      
+      // Check if item start falls in this quarter
+      if (normalizedStart >= quarterStart && normalizedStart <= quarterEnd) {
+        startColumnIndex = i;
+      }
+      
+      // Check if item end falls in this quarter
+      if (normalizedEnd >= quarterStart && normalizedEnd <= quarterEnd) {
+        endColumnIndex = i;
+      }
+    }
     
-    const daysFromStartToItemEnd = Math.min(totalDays, Math.round(
-      (normalizedEnd.getTime() - visibleStartDate.getTime()) / (24 * 60 * 60 * 1000)
-    ));
+    // If no match found, use closest
+    if (startColumnIndex === -1) startColumnIndex = 0;
+    if (endColumnIndex === -1) endColumnIndex = timeColumns.length - 1;
     
-    // Calculate positions as proportion of total timeline width
-    const timelineWidth = getTimelineWidth();
-    const left = (daysFromStartToItemStart / totalDays) * timelineWidth;
-    const width = ((daysFromStartToItemEnd - daysFromStartToItemStart) / totalDays) * timelineWidth;
+    // Calculate position within quarter
+    let startOffset = 0;
+    let endOffset = columnWidth;
+    
+    if (startColumnIndex >= 0) {
+      const quarterStart = timeColumns[startColumnIndex];
+      const daysInQuarter = getDaysInQuarter(quarterStart.getFullYear(), Math.floor(quarterStart.getMonth() / 3));
+      const dayOfQuarter = getDayOfQuarter(normalizedStart);
+      startOffset = (dayOfQuarter / daysInQuarter) * columnWidth;
+    }
+    
+    if (endColumnIndex >= 0) {
+      const quarterStart = timeColumns[endColumnIndex];
+      const daysInQuarter = getDaysInQuarter(quarterStart.getFullYear(), Math.floor(quarterStart.getMonth() / 3));
+      const dayOfQuarter = getDayOfQuarter(normalizedEnd);
+      endOffset = (dayOfQuarter / daysInQuarter) * columnWidth;
+    }
+    
+    // Calculate final position
+    const left = startColumnIndex * columnWidth + startOffset;
+    const right = endColumnIndex * columnWidth + endOffset;
     
     return {
       left: `${left}px`,
-      width: `${Math.max(width, 50)}px` // Minimum width of 50px
+      width: `${Math.max(right - left, 50)}px`, // Minimum width
     };
   }
   

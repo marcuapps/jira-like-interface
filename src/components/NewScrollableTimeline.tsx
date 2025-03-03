@@ -499,11 +499,6 @@ const handleEpicMouseDown = (
   }
 };
 
-// const handleAddNewEpic = () => {
-//   // onCreateSprint && onCreateSprint(sprintId);
-//   onCreateNewEpic && onCreateNewEpic(sprintId);
-// }
-
 const handleEnterPress = (value: string) => {
   console.log('Enter pressed with value:', value);
   // Add your action logic here
@@ -564,32 +559,6 @@ const handleEnterPress = (value: string) => {
           {/* Content area */}
           <div className="flex">
             {/* Fixed sprint names sidebar */}
-            {/* <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-10">
-              {sprints.map((sprint) => (
-                <div 
-                  key={sprint.id} 
-                  className="p-4 border-b border-gray-200 h-12 flex items-center"
-                >
-                  <div className="font-medium">{sprint.name}</div>
-                </div>
-              ))}
-              <div className="p-4 border-b border-gray-200 h-12 flex items-center">
-                <button
-                  className='py-1 rounded text-gray-700 hover:bg-gray-50'
-                  onClick={() => handleAddSprint(sprints[0].id)}
-                >+ Add epic</button>
-              </div>
-              <div>
-              <EpicNameTextInput
-                  icon={<FileQuestion />}
-                  placeholder="What needs to be done?"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onEnter={handleEnterPress}
-                />
-              </div>
-            </div> */}
-
             <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-10">
               {sprints.map((sprint) => (
                 <div key={sprint.id}>
@@ -605,13 +574,13 @@ const handleEnterPress = (value: string) => {
               ))}
               <div className='p-2'>
                 {textInputIsVisible ? (
-                                  <EpicNameTextInput
-                                  icon={<FileQuestion />}
-                                  placeholder="What needs to be done?"
-                                  value={inputValue}
-                                  onChange={(e) => setInputValue(e.target.value)}
-                                  onEnter={handleEnterPress}
-                                />
+                  <EpicNameTextInput
+                    icon={<FileQuestion />}
+                    placeholder="What needs to be done?"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onEnter={handleEnterPress}
+                  />
                 ): (
                   <button
                   className='py-1 rounded text-gray-700 hover:bg-gray-50'

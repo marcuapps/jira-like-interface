@@ -49,6 +49,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
     startDate: Date;
     endDate: Date;
   } | null>(null);
+  const [textInputIsVisible, setTextInputIsVisible] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -498,10 +499,10 @@ const handleEpicMouseDown = (
   }
 };
 
-const handleAddSprint = (sprintId: string) => {
-  // onCreateSprint && onCreateSprint(sprintId);
-  onCreateNewEpic && onCreateNewEpic(sprintId);
-}
+// const handleAddNewEpic = () => {
+//   // onCreateSprint && onCreateSprint(sprintId);
+//   onCreateNewEpic && onCreateNewEpic(sprintId);
+// }
 
 const handleEnterPress = (value: string) => {
   console.log('Enter pressed with value:', value);
@@ -512,6 +513,7 @@ const handleEnterPress = (value: string) => {
 
   // Optionally clear the input after action
   setInputValue('');
+  setTextInputIsVisible(false)
 };
 
   return (
@@ -602,13 +604,23 @@ const handleEnterPress = (value: string) => {
                 </div>
               ))}
               <div className='p-2'>
-                <EpicNameTextInput
-                  icon={<FileQuestion />}
-                  placeholder="What needs to be done?"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onEnter={handleEnterPress}
-                />
+                {textInputIsVisible ? (
+                                  <EpicNameTextInput
+                                  icon={<FileQuestion />}
+                                  placeholder="What needs to be done?"
+                                  value={inputValue}
+                                  onChange={(e) => setInputValue(e.target.value)}
+                                  onEnter={handleEnterPress}
+                                />
+                ): (
+                  <button
+                  className='py-1 rounded text-gray-700 hover:bg-gray-50'
+                  onClick={() => setTextInputIsVisible(!textInputIsVisible)}
+                >+ Add epic
+                </button>
+                )}
+
+
               </div>
             </div>
             

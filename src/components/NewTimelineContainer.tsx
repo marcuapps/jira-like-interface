@@ -211,7 +211,7 @@ const NewTimelineContainer: React.FC = () => {
     <div className="relative">
       <div className="absolute left-0 right-0 overflow-x-hidden overflow-y-hidden">
         {/* Timeline */}
-        <div className="flex-1 overflow-hidden border">
+        <div className="flex-1 overflow-hidden border h-[500px]">
           <NewScrollableTimeline
             sprints={sprints}
             onCreateEpic={handleCreateEpic}

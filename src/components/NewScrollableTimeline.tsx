@@ -748,7 +748,7 @@ const handleEnterPress = (value: string) => {
           {/* Content area */}
           <div className="flex">
             {/* Fixed sprint names sidebar */}
-            <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-10">
+            <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-20">
               {sprints.map((sprint) => (
                 <div key={sprint.id}>
                   {sprint.epics?.map((epic) => (

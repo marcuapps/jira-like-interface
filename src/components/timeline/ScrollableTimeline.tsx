@@ -5,10 +5,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sprint, Epic } from '@/lib/types';
 import { getStartOfWeek, getEndOfWeek, getDaysInQuarter, getDayOfQuarter, normalizeDate } from '@/utils/dateUtils';
 import DayTilesRow from '../DayTilesRow';
-import { FileQuestion } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import EpicNameTextInput from '../EpicNameTextInput';
 import { TimeUnit } from '@/lib/types';
 import TimelineControls from './TimelineControls';
+import { isCurrentTimeUnit } from '@/utils/positionUtils';
 
 // type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
 
@@ -129,10 +130,7 @@ const getColumnWidth = () => {
     }
   }, [timeColumns, timeUnit]);
 
-  // Scroll to today
-// Improved scrollToToday function that actually works
 
-// 1. Update the scrollToToday function to use the new column-based positioning
 const scrollToToday = () => {
   // Wait for the timeline to be rendered and columns to be generated
   setTimeout(() => {
@@ -556,43 +554,6 @@ const handleMouseMove = (event: React.MouseEvent) => {
     }
   };
 
-// 3. Add a helper function to check if a column represents the current month/day/etc.
-// Fix for isCurrentTimeUnit to properly identify the current time unit
-const isCurrentTimeUnit = (date: Date) => {
-  // Normalize dates to remove time components
-  const normalizedToday = new Date(today);
-  normalizedToday.setHours(0, 0, 0, 0);
-  
-  const normalizedDate = new Date(date);
-  normalizedDate.setHours(0, 0, 0, 0);
-  
-  if (timeUnit === 'Months') {
-    // For months, check if month and year match
-    return normalizedDate.getMonth() === normalizedToday.getMonth() && 
-           normalizedDate.getFullYear() === normalizedToday.getFullYear();
-  } else if (timeUnit === 'Weeks') {
-    // For weeks, check if today falls within the week
-    const weekStart = getStartOfWeek(normalizedDate);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    
-    // Make sure we normalize these dates too
-    weekStart.setHours(0, 0, 0, 0);
-    weekEnd.setHours(23, 59, 59, 999); // End of day
-    
-    return normalizedToday >= weekStart && normalizedToday <= weekEnd;
-  } else if (timeUnit === 'Quarters') {
-    // For quarters, check if quarter and year match
-    const dateQuarter = Math.floor(normalizedDate.getMonth() / 3);
-    const todayQuarter = Math.floor(normalizedToday.getMonth() / 3);
-    
-    return dateQuarter === todayQuarter && 
-           normalizedDate.getFullYear() === normalizedToday.getFullYear();
-  }
-  
-  return false;
-};
-
 // 2. Update the handleEpicMouseDown function to store original positions
 const handleEpicMouseDown = (
   event: React.MouseEvent, 
@@ -631,7 +592,7 @@ const handleEpicMouseDown = (
   }
 };
 
-const handlePlacingEpicMouseOver = (
+const handlePlacingEpicMouseMove = (
   event: React.MouseEvent,
   epicId: string,
 ) => {
@@ -691,7 +652,7 @@ const handleEnterPress = (value: string) => {
 };
 
   return (
-    <div className="flex flex-col border border-gray-200 rounded">
+    <div className="flex flex-col border border-gray-200 rounded h-[500px]">
       {/* Single scrollable container that includes both header and content */}
       <div 
         className="flex-grow overflow-x-auto"
@@ -715,7 +676,7 @@ const handleEnterPress = (value: string) => {
                   <div 
                     key={index} 
                     className={`flex-shrink-0 text-center border-r border-gray-200 p-2 ${
-                      isCurrentTimeUnit(column) ? 'bg-blue-50' : ''
+                      isCurrentTimeUnit(column, today, timeUnit) ? 'bg-blue-50' : ''
                     }`}
                     style={{ width: `${columnWidth}px` }}
                   >
@@ -738,7 +699,7 @@ const handleEnterPress = (value: string) => {
           {/* Content area */}
           <div className="flex">
             {/* Fixed sprint names sidebar */}
-            <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-20">
+            <div className="flex-shrink-0 w-96 border-r border-gray-200 sticky left-0 bg-white z-20 h-[500px]">
               {sprints.map((sprint) => (
                 <div key={sprint.id}>
                   {sprint.epics?.map((epic) => (
@@ -754,7 +715,7 @@ const handleEnterPress = (value: string) => {
               <div className='p-2'>
                 {textInputIsVisible ? (
                   <EpicNameTextInput
-                    icon={<FileQuestion />}
+                    icon={<Plus className='text-purple-600' />}
                     placeholder="What needs to be done?"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
@@ -794,11 +755,11 @@ const handleEnterPress = (value: string) => {
 
               {calculateTodayPosition() && (
                 <div 
-                  className="absolute top-0 bottom-0 w-px bg-red-500 z-10"
+                  className="absolute top-0 bottom-0 w-px bg-blue-500 z-10"
                   style={{ left: calculateTodayPosition() }}
                 >
-                  <div className="absolute top-0 left-0 transform -translate-x-1/2 bg-red-500 text-white text-xs rounded px-1 py-0.5">
-                    Today
+                  <div className="absolute top-0 left-0 transform -translate-x-1/2 bg-blue-500 text-white text-xs rounded px-1 py-0.5">
+                    
                   </div>
                 </div>
               )}
@@ -813,7 +774,7 @@ const handleEnterPress = (value: string) => {
                   }`}
                   onMouseMove={(e) => {
                     if (!epic.isPlaced) {
-                      handlePlacingEpicMouseOver(e, epic.id)
+                      handlePlacingEpicMouseMove(e, epic.id)
                     }
                   }}
                   onClick={(e) => handleClickOnEpicRow(e, epic.id)}

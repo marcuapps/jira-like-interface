@@ -141,36 +141,6 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
 
       {/* Timeline */}
       <NewTimelineContainer />
-      
-      <div className="border rounded-lg absolute bottom-10 right-20">
-        {/* Timeline Controls */}
-        <div className="flex items-center justify-between p-4 border-t">
-          <div className="flex items-center space-x-4">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {['Today', 'Weeks', 'Months', 'Quarters'].map(mode => (
-              <button
-                key={mode}
-                className={`px-3 py-1 rounded ${
-                  viewMode === mode ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setViewMode(mode as typeof viewMode)}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <Info className="w-4 h-4" />
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100">
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
       </div>
     </div>
   );

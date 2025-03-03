@@ -5,8 +5,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sprint, Epic } from '@/lib/types';
 import { getQuarterProgress } from '@/utils/dateUtils';
 import DayTilesRow from './DayTilesRow';
+import { ChevronDown, Maximize2, Info } from 'lucide-react';
 
-type TimeUnit = 'day' | 'week' | 'month' | 'quarter';
+type TimeUnit = 'Weeks' | 'Months' | 'Quarters';
 
 interface ScrollableTimelineViewProps {
   sprints: Sprint[];
@@ -31,7 +32,7 @@ const ScrollableTimeline: React.FC<ScrollableTimelineViewProps> = ({
   const defaultEndDate = new Date(today);
   defaultEndDate.setFullYear(today.getFullYear() + 2);
   
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('month');
+  const [timeUnit, setTimeUnit] = useState<TimeUnit>('Months');
   const [visibleStartDate, setVisibleStartDate] = useState<Date>(new Date(defaultStartDate));
   const [visibleEndDate, setVisibleEndDate] = useState<Date>(new Date(defaultEndDate));
   const [timeColumns, setTimeColumns] = useState<Date[]>([]);
@@ -75,16 +76,13 @@ useEffect(() => {
     columns.push(new Date(current));
     
     switch (timeUnit) {
-      case 'day':
-        current.setDate(current.getDate() + 1);
-        break;
-      case 'week':
+      case 'Weeks':
         current.setDate(current.getDate() + 7);
         break;
-      case 'month':
+      case 'Months':
         current.setMonth(current.getMonth() + 1);
         break;
-      case 'quarter':
+      case 'Quarters':
         current.setMonth(current.getMonth() + 3);
         break;
     }
@@ -125,7 +123,7 @@ const scrollToToday = () => {
     // Find position of today based on the current time unit
     let todayPosition = 0;
     
-    if (timeUnit === 'month') {
+    if (timeUnit === 'Months') {
       // Find which month column today belongs to
       const monthIndex = timeColumns.findIndex(col => 
         col.getMonth() === today.getMonth() && 
@@ -135,18 +133,7 @@ const scrollToToday = () => {
       if (monthIndex !== -1) {
         todayPosition = monthIndex * columnWidth;
       }
-    } else if (timeUnit === 'day') {
-      // For day view, find the exact day
-      const dayIndex = timeColumns.findIndex(col => 
-        col.getDate() === today.getDate() && 
-        col.getMonth() === today.getMonth() && 
-        col.getFullYear() === today.getFullYear()
-      );
-      
-      if (dayIndex !== -1) {
-        todayPosition = dayIndex * columnWidth;
-      }
-    } else if (timeUnit === 'week') {
+    } else if (timeUnit === 'Weeks') {
       // For week view, find the week that contains today
       const weekIndex = timeColumns.findIndex(col => {
         // Create date range for the week
@@ -160,7 +147,7 @@ const scrollToToday = () => {
       if (weekIndex !== -1) {
         todayPosition = weekIndex * columnWidth;
       }
-    } else if (timeUnit === 'quarter') {
+    } else if (timeUnit === 'Quarters') {
       // For quarter view
       const todayQuarter = Math.floor(today.getMonth() / 3);
       const todayYear = today.getFullYear();
@@ -240,7 +227,7 @@ const calculateTodayPosition = () => {
   if (today < visibleStartDate || today > visibleEndDate) return null;
   
   // For more precise positioning in different time units
-  if (timeUnit === 'month') {
+  if (timeUnit === 'Months') {
     // Find which month column today belongs to
     const monthIndex = timeColumns.findIndex(col => 
       col.getMonth() === today.getMonth() && 
@@ -254,18 +241,7 @@ const calculateTodayPosition = () => {
       // return `${monthIndex * columnWidth}px`;
       return `${monthIndex * columnWidth + today.getDate() / totalDays * columnWidth}px`;
     }
-  } else if (timeUnit === 'day') {
-    // For day view, find the exact day
-    const dayIndex = timeColumns.findIndex(col => 
-      col.getDate() === today.getDate() && 
-      col.getMonth() === today.getMonth() && 
-      col.getFullYear() === today.getFullYear()
-    );
-    
-    if (dayIndex !== -1) {
-      return `${dayIndex * columnWidth}px`;
-    }
-  } else if (timeUnit === 'week') {
+  } else if (timeUnit === 'Weeks') {
     // For week view, find the week that contains today
     const weekIndex = timeColumns.findIndex(col => {
       // Create date range for the week
@@ -277,9 +253,9 @@ const calculateTodayPosition = () => {
     });
     
     if (weekIndex !== -1) {
-      return `${weekIndex * columnWidth + today.getDay() / 7 * columnWidth - 20}px`;
+      return `${(weekIndex + 1) * columnWidth + today.getDay() / 7 * columnWidth - 10}px`;
     }
-  } else if (timeUnit === 'quarter') {
+  } else if (timeUnit === 'Quarters') {
     // For quarter view
     const todayQuarter = Math.floor(today.getMonth() / 3);
     const todayYear = today.getFullYear();
@@ -438,13 +414,11 @@ const handleMouseMove = (event: React.MouseEvent) => {
   // Format column date based on time unit
   const formatColumnDate = (date: Date) => {
     switch (timeUnit) {
-      case 'day':
-        return date.toLocaleDateString(undefined, { day: '2-digit' });
-      case 'week':
+      case 'Weeks':
         return `${date.toLocaleDateString(undefined, { month: 'short' }).toUpperCase()}`;
-      case 'month':
+      case 'Months':
         return date.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
-      case 'quarter':
+      case 'Quarters':
         const quarter = Math.floor(date.getMonth() / 3);
         
         // Format as month ranges
@@ -460,21 +434,17 @@ const handleMouseMove = (event: React.MouseEvent) => {
 
 // 3. Add a helper function to check if a column represents the current month/day/etc.
 const isCurrentTimeUnit = (date: Date) => {
-  if (timeUnit === 'day') {
-    return date.getDate() === today.getDate() && 
-           date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
-  } else if (timeUnit === 'month') {
+  if (timeUnit === 'Months') {
     return date.getMonth() === today.getMonth() && 
            date.getFullYear() === today.getFullYear();
-  } else if (timeUnit === 'week') {
+  } else if (timeUnit === 'Weeks') {
     // Check if the week contains today
     const weekStart = new Date(date);
     const weekEnd = new Date(date);
     weekEnd.setDate(weekEnd.getDate() + 6);
     
     return today >= weekStart && today <= weekEnd;
-  } else if (timeUnit === 'quarter') {
+  } else if (timeUnit === 'Quarters') {
     const dateQuarter = Math.floor(date.getMonth() / 3);
     const todayQuarter = Math.floor(today.getMonth() / 3);
     
@@ -523,52 +493,6 @@ const handleEpicMouseDown = (
     setDraggingEpic(epicId);
   }
 };
-  // Get week number helper
-  const getWeekNumber = (date: Date) => {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  };
-
-  // Zoom in/out on the timeline
-  const handleZoom = (direction: 'in' | 'out') => {
-    // Get current center date
-    if (!timelineRef.current) return;
-    
-    const { scrollLeft, clientWidth } = timelineRef.current;
-    const centerScrollPosition = scrollLeft + (clientWidth / 2);
-    const centerDate = pixelToDate(centerScrollPosition - scrollLeft);
-    
-    // Change time unit based on zoom direction
-    if (direction === 'in') {
-      switch (timeUnit) {
-        case 'quarter':
-          setTimeUnit('month');
-          break;
-        case 'month':
-          setTimeUnit('week');
-          break;
-        case 'week':
-          setTimeUnit('day');
-          break;
-      }
-    } else {
-      switch (timeUnit) {
-        case 'day':
-          setTimeUnit('week');
-          break;
-        case 'week':
-          setTimeUnit('month');
-          break;
-        case 'month':
-          setTimeUnit('quarter');
-          break;
-      }
-    }
-    
-    // After changing time unit, we'll scroll to center on the same date
-    // This is handled by a useEffect that watches timeUnit
-  };
 
   return (
     <div className="flex flex-col border border-gray-200 rounded">
@@ -599,7 +523,7 @@ const handleEpicMouseDown = (
                     }`}
                     style={{ width: `${columnWidth}px` }}
                   >
-                    {timeUnit === 'week' ? (
+                    {timeUnit === 'Weeks' ? (
                       <div>
                         <div className="font-medium text-gray-700">{formatColumnDate(column)}</div>
                         <DayTilesRow startDate={getStartOfWeek(column)} endDate={getEndOfWeek(column)} />
@@ -730,59 +654,35 @@ const handleEpicMouseDown = (
           </div>
         </div>
       </div>
-      
-      {/* Footer controls */}
-      <div className="flex justify-between p-2 border-t border-gray-200 bg-gray-50">
-        {/* Zoom controls */}
-        <div className="flex space-x-2">
-          <button 
-            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 rounded"
-            onClick={() => handleZoom('out')}
-            disabled={timeUnit === 'quarter'}
-          >
-            Zoom Out
-          </button>
-          <button 
-            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 rounded"
-            onClick={() => handleZoom('in')}
-            disabled={timeUnit === 'day'}
-          >
-            Zoom In
-          </button>
-          <button 
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded"
-            onClick={scrollToToday}
-          >
-            Today
-          </button>
-        </div>
-        
-        {/* Time unit controls */}
-        <div className="flex space-x-2">
-          <button 
-            className={`px-3 py-1 text-sm rounded ${timeUnit === 'day' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            onClick={() => setTimeUnit('day')}
-          >
-            Daily
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded ${timeUnit === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            onClick={() => setTimeUnit('week')}
-          >
-            Weekly
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded ${timeUnit === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            onClick={() => setTimeUnit('month')}
-          >
-            Monthly
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded ${timeUnit === 'quarter' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            onClick={() => setTimeUnit('quarter')}
-          >
-            Quarterly
-          </button>
+    
+        <div className="border rounded-lg absolute bottom-0 right-20 z-20 bg-white">
+        {/* Timeline Controls */}
+        <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex items-center space-x-4">
+            <button className="p-1 rounded hover:bg-gray-100">
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            <button className='px-3 py-1 rounded text-gray-700 hover:bg-gray-50' onClick={() => scrollToToday()}>Today</button>
+            {['Weeks', 'Months', 'Quarters'].map(mode => (
+              <button
+                key={mode}
+                className={`px-3 py-1 rounded ${
+                  timeUnit === mode ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => setTimeUnit(mode as typeof timeUnit)}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="p-1 rounded hover:bg-gray-100">
+              <Info className="w-4 h-4" />
+            </button>
+            <button className="p-1 rounded hover:bg-gray-100">
+              <Maximize2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

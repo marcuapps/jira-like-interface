@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import NewScrollableTimeline from '@/components/NewScrollableTimeline';
 import { Sprint, Epic } from '@/lib/types';
 
-const TimelineContainer: React.FC = () => {
+const NewTimelineContainer: React.FC = () => {
   // Sample data 
   const today = new Date();
   
@@ -174,4 +174,4 @@ const TimelineContainer: React.FC = () => {
   );
 };
 
-export default TimelineContainer;
+export default NewTimelineContainer;

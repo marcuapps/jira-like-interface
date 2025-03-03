@@ -1,15 +1,10 @@
 'use client'
 import React, { useState } from 'react';
-import { Search, Settings2, Share, Download, MoreHorizontal, ChevronDown, Info, Maximize2 } from 'lucide-react';
-import TimelineContainer from '@/components/TimelineContainer';
+import { Search, Settings2, Share, Download, MoreHorizontal, Info } from 'lucide-react';
+import TimelineContainer from '@/components/timeline/TimelineContainer';
 import StatusCategoryDropdown from '@/components/StatusCategoryDropdown';
 
-interface TimelineProps {
-  projectId: string;
-}
-
-const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
-  const [viewMode, setViewMode] = useState<'Today' | 'Weeks' | 'Months' | 'Quarters'>('Months');
+const Timeline = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSettings, setShowSettings] = useState(false);
 
@@ -140,37 +135,7 @@ const Timeline: React.FC<TimelineProps> = ({ projectId }) => {
       </div>
 
       {/* Timeline */}
-      <TimelineContainer timeOption={viewMode} />
-      
-      <div className="border rounded-lg absolute bottom-10 right-20">
-        {/* Timeline Controls */}
-        <div className="flex items-center justify-between p-4 border-t">
-          <div className="flex items-center space-x-4">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {['Today', 'Weeks', 'Months', 'Quarters'].map(mode => (
-              <button
-                key={mode}
-                className={`px-3 py-1 rounded ${
-                  viewMode === mode ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setViewMode(mode as typeof viewMode)}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <Info className="w-4 h-4" />
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100">
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <TimelineContainer />
       </div>
     </div>
   );
